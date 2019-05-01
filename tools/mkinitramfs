@@ -1,0 +1,46 @@
+#!/bin/sh
+
+usage() {
+	cat <<EOF
+usage: mkinitramfs [-h]
+    mkinitramfs -a <initramfs> -i <init> -c <candidates>
+EOF
+	exit $1
+}
+
+while getopts ha:i:c: opt
+do
+	case $opt in
+	h) usage 0 ;;
+	a) initramfs="`pwd`/$OPTARG" ;;
+	i) init="`pwd`/$OPTARG" ;;
+	c) candidates="`pwd`/$OPTARG" ;;
+	*) usage 1 ;;
+	esac
+done
+
+[ -z $initramfs ] && usage 1
+
+if tempdir=`mktemp -d /tmp/mkinitramfs.XXXXXX`
+then
+	set -e
+	cd "$tempdir"
+
+	if [ ! -z "$init" ]
+	then
+		mkdir dev mnt
+		cp "$init" init
+	fi
+
+	if [ ! -z "$candidates" ]
+	then
+		cp "$candidates" candidates
+	fi
+
+	find . | cpio -oH newc | gzip -9 > "$initramfs"
+
+	echo "Created $initramfs"
+
+	cd && rm -rf "$tempdir"
+fi
+
