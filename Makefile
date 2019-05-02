@@ -16,4 +16,7 @@ linux/arch/x86_64/boot/bzImage: linux/.config
 
 clean:
 	rm -rf initramfs.cpio.gz initramfs/init
+
+distclean: clean
 	make -C linux distclean
+
