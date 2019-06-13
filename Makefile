@@ -5,7 +5,7 @@ simu: all
 #	qemu-system-x86_64 -kernel linux/arch/x86_64/boot/bzImage -initrd initramfs.cpio.gz
 	qemu-system-x86_64 -nographic -no-reboot -kernel linux/arch/x86_64/boot/bzImage -initrd initramfs.cpio.gz -append 'panic=1 console=ttyS0' -hda hda.img
 
-initramfs.cpio.gz:
+initramfs.cpio.gz: $(wildcard src/*.c)
 	make -C initramfs
 
 linux/.config:
