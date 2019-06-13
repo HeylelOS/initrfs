@@ -1,0 +1,43 @@
+#!/bin/sh
+
+if [ `id -u` -ne 0 ]
+then
+	echo "$0 must be used as root"
+	exit 1
+fi
+
+if [ $# -eq 2 ]
+then
+	initramfs="$PWD/$1"
+	init="$PWD/$2"
+else
+	echo "usage: $0 <archive> <init>"
+	exit 1
+fi
+
+tempdir=`mktemp -d /tmp/mkinitramfs.XXXXXX`
+cd "$tempdir"
+
+mkdir dev mnt
+error="$?"
+
+cat > candidates <<EOF
+sda ext4 defaults /bin/sh /etc/fstab
+sda ext4 ro /bin/sh none
+EOF
+error="$?$error"
+
+cp "$init" init
+error="$?$error"
+
+chown -R 0:0 "$tempdir"
+error="$?$error"
+
+if [ "$error" -ne "000" ]
+then echo "Unable to create initramfs"
+else find . | cpio -oH newc | gzip -9 > "$initramfs"
+fi
+
+cd
+rm -rf "$tempdir"
+

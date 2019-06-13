@@ -1,13 +1,12 @@
 #include "candidate.h"
+#include "filesystem.h"
 
-#include <stdio.h>
-#include <dirent.h>
 #include <string.h>
+#include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <limits.h>
-#include <err.h>
 #include <sys/mount.h>
+#include <err.h>
 
 static void
 dir_remove_entries(int fd) {
@@ -15,21 +14,22 @@ dir_remove_entries(int fd) {
 	struct dirent *entry;
 
 	while((entry = readdir(dirp)) != NULL) {
-		int flags = 0;
-
-		if(entry->d_type == DT_DIR
-			&& strcmp(".", entry->d_name) != 0
+		if(strcmp(".", entry->d_name) != 0
 			&& strcmp("..", entry->d_name) != 0) {
-			int entryfd = openat(dirfd(dirp), entry->d_name, O_RDONLY);
+			int flags = 0;
 
-			dir_remove_entries(entryfd);
+			if(entry->d_type == DT_DIR) {
+				int entryfd = openat(dirfd(dirp), entry->d_name, O_RDONLY);
 
-			close(entryfd);
+				dir_remove_entries(entryfd);
 
-			flags = AT_REMOVEDIR;
+				close(entryfd);
+
+				flags = AT_REMOVEDIR;
+			}
+
+			unlinkat(dirfd(dirp), entry->d_name, flags);
 		}
-
-		unlinkat(dirfd(dirp), entry->d_name, flags);
 	}
 }
 
@@ -51,49 +51,19 @@ switch_root(struct candidate *root) {
 	dir_remove_entries(oldrootfd);
 	close(oldrootfd);
 
+	const char *init = "/sbin/init";
 	char * const arguments[] = { "init", NULL };
-	if(execv("/init", arguments) == -1) {
-		err(1, "Unable to execute init for profile %s of %s", root->profile, root->device);
-	}
-}
-
-int
-prepare_candidate(struct candidate const *candidate) {
-	char source[PATH_MAX];
-	snprintf(source, sizeof(source), "/dev/%s", candidate->device);
-
-	/* Mounting candidate */
-	if(mount(source, "/mnt", candidate->fstype, 0, NULL) == -1) {
-		warn("Unable to mount candidate %s as %s at /mnt", candidate->device, candidate->fstype);
-		goto init_candidate_err0;
+	if(filesystem_tab_mount(root->fstab) == 0) {
+		if(execv("/sbin/init", arguments) == -1) {
+			warn("Unable to execute \"/sbin/init\" for %s", root->device);
+		}
+	} else {
+		warnx("Unable to correctly mount fstab, using recovery init");
 	}
 
-	/* Moving /dev */
-	if(mount("/dev", "/mnt/dev", NULL, MS_MOVE, NULL) == -1) {
-		warn("Unable to mount /dev for candidate %s", candidate->device);
-		goto init_candidate_err1;
+	if(execv(root->recover, arguments) == -1) {
+		err(1, "Unable to execute recover init \"%s\" for %s", root->recover, root->device);
 	}
-
-	/* Better move before next mount */
-	if(chdir("/mnt") == -1) {
-		warn("Unable to chdir to /mnt for candidate %s", candidate->device);
-		goto init_candidate_err2;
-	}
-
-	return 0;
-
-init_candidate_err2:
-	if(mount("/mnt/dev", "/dev", NULL, MS_MOVE, NULL) == -1) {
-		warn("Unable to reset /mnt/dev to /dev for %s", candidate->device);
-	}
-
-init_candidate_err1:
-	if(umount("/mnt") == -1) {
-		warn("Unable to unmount failing candidate");
-	}
-
-init_candidate_err0:
-	return -1;
 }
 
 int
@@ -111,9 +81,11 @@ main(void) {
 
 	struct candidate *root = list;
 	while(root != NULL) {
-		if(prepare_candidate(root) == 0) {
+		if(candidate_prepare(root) == 0) {
 			switch_root(root);
 			/* No return */
+		} else {
+			warnx("Candidate %s as %s failed", root->device, root->fstype);
 		}
 
 		root = root->next;
