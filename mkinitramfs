@@ -6,12 +6,13 @@ then
 	exit 1
 fi
 
-if [ $# -eq 2 ]
+if [ $# -eq 3 ]
 then
 	initramfs="$PWD/$1"
 	init="$PWD/$2"
+	candidates="$PWD/$3"
 else
-	echo "usage: $0 <archive> <init>"
+	echo "usage: $0 <archive> <init> <candidates>"
 	exit 1
 fi
 
@@ -21,10 +22,7 @@ cd "$tempdir"
 mkdir dev mnt
 error="$?"
 
-cat > candidates <<EOF
-sda ext4 defaults /bin/sh /etc/fstab
-sda ext4 ro /bin/sh none
-EOF
+cp "$candidates" candidates
 error="$?$error"
 
 cp "$init" init

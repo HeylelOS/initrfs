@@ -9,8 +9,8 @@ simu: all
 initramfs: $(wildcard src/*.c)
 	$(CC) -static -o $@ $^
 
-initramfs.cpio.gz: initramfs
-	sudo ./mkinitramfs $@ $<
+initramfs.cpio.gz: initramfs candidates
+	sudo ./mkinitramfs $@ $^
 
 linux/.config:
 	make -C linux x86_64_defconfig
