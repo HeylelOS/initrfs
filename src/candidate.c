@@ -67,7 +67,6 @@ candidate_prepare(struct candidate *candidate) {
 		{ "", "/mnt/proc", "proc", 0, NULL },
 		{ "", "/mnt/sys", "sysfs", 0, NULL },
 		{ "", "/mnt/var", "tmpfs", 0, NULL },
-		{ "", "/mnt/run", "tmpfs", 0, NULL },
 		{ "", "/mnt/tmp", "tmpfs", 0, NULL },
 	};
 	char source[PATH_MAX];
