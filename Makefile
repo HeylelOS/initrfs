@@ -1,26 +1,50 @@
 CC=clang
+CFLAGS=-g -Wall -fPIC
+LDFLAGS=-static
 
-all: initramfs.cpio.gz linux/arch/x86_64/boot/bzImage
+CANDIDATES=./test/candidates
 
-simu: all
-#	qemu-system-x86_64 -kernel linux/arch/x86_64/boot/bzImage -initrd initramfs.cpio.gz
-	qemu-system-x86_64 -nographic -no-reboot -kernel linux/arch/x86_64/boot/bzImage -initrd initramfs.cpio.gz -append 'panic=1 console=ttyS0' -hda hda.img
+BUILDDIR=./build
+INITRAMFS=$(BUILDDIR)/initramfs.cpio.gz
+INITRAMFS_BIN=$(BUILDDIR)/bin/init
+INITRAMFS_SRC=$(wildcard src/*.c)
+TEST_BIN=$(BUILDDIR)/bin/test
+TEST_SRC=test/test.c
+TEST_IMAGE=$(BUILDDIR)/hda.img
 
-initramfs: $(wildcard src/*.c)
-	$(CC) -static -o $@ $^
+LINUX=linux
 
-initramfs.cpio.gz: initramfs candidates
-	sudo ./mkinitramfs $@ $^
+.PHONY: all test clean
 
-linux/.config:
-	make -C linux x86_64_defconfig
+all: $(INITRAMFS)
 
-linux/arch/x86_64/boot/bzImage: linux/.config
-	make -C linux -j `nproc`
+test: $(LINUX) $(INITRAMFS) $(TEST_IMAGE)
+	qemu-system-x86_64 -nographic -no-reboot -kernel $(LINUX)/arch/x86_64/boot/bzImage -initrd $(INITRAMFS) -append 'panic=1 console=ttyS0' -hda $(TEST_IMAGE)
 
 clean:
-	rm -rf initramfs.cpio.gz initramfs
+	rm -rf $(BUILDDIR)
 
-distclean: clean
-	make -C linux distclean
+$(BUILDDIR):
+	mkdir -p $(BUILDDIR)/bin
+
+$(LINUX):
+	git submodule init
+	git submodule update
+	make -C $@ distclean x86_64_defconfig
+	make -C $@ -j `nproc`
+
+$(INITRAMFS): $(INITRAMFS_BIN) $(BUILDDIR)
+	./tools/mkinitramfs -a $@ -i $< -c $(CANDIDATES)
+
+$(INITRAMFS_BIN): $(INITRAMFS_SRC) $(BUILDDIR)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(INITRAMFS_SRC)
+
+$(TEST_IMAGE): $(TEST_BIN) $(BUILDDIR)
+	cp test/hda.img $@
+	mount $@ /mnt
+	cp $< /mnt/sbin/init
+	umount /mnt
+
+$(TEST_BIN): $(TEST_SRC) $(BUILDDIR)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(TEST_SRC)
 

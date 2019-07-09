@@ -54,8 +54,8 @@ switch_root(struct candidate *root) {
 	const char *init = "/sbin/init";
 	char * const arguments[] = { "init", NULL };
 	if(filesystem_tab_mount(root->fstab) == 0) {
-		if(execv("/sbin/init", arguments) == -1) {
-			warn("Unable to execute \"/sbin/init\" for %s", root->device);
+		if(execv(init, arguments) == -1) {
+			warn("Unable to execute \"%s\" for %s", init, root->device);
 		}
 	} else {
 		warnx("Unable to correctly mount fstab, using recovery init");
