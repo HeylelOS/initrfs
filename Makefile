@@ -1,5 +1,5 @@
-CC=clang
-CFLAGS=-g -Wall -fPIC
+CC=musl-clang
+CFLAGS=-O3 -Wall -fPIC
 LDFLAGS=-static
 
 CANDIDATES=./test/candidates
@@ -13,13 +13,14 @@ TEST_SRC=test/test.c
 TEST_IMAGE=$(BUILDDIR)/hda.img
 
 LINUX=linux
+LINUX_IMAGE=$(LINUX)/arch/x86_64/boot/bzImage
 
 .PHONY: all test clean
 
 all: $(INITRAMFS)
 
-test: $(LINUX) $(INITRAMFS) $(TEST_IMAGE)
-	qemu-system-x86_64 -nographic -no-reboot -kernel $(LINUX)/arch/x86_64/boot/bzImage -initrd $(INITRAMFS) -append 'panic=1 console=ttyS0' -hda $(TEST_IMAGE)
+test: $(LINUX_IMAGE) $(INITRAMFS) $(TEST_IMAGE)
+	qemu-system-x86_64 -nographic -no-reboot -kernel $(LINUX_IMAGE) -initrd $(INITRAMFS) -append 'panic=1 console=ttyS0' -hda $(TEST_IMAGE)
 
 clean:
 	rm -rf $(BUILDDIR)
@@ -31,7 +32,9 @@ $(LINUX):
 	git submodule init
 	git submodule update
 	make -C $@ distclean x86_64_defconfig
-	make -C $@ -j `nproc`
+
+$(LINUX_IMAGE): $(LINUX)
+	make -C $< -j `nproc`
 
 $(INITRAMFS): $(INITRAMFS_BIN) $(BUILDDIR)
 	./tools/mkinitramfs -a $@ -i $< -c $(CANDIDATES)
