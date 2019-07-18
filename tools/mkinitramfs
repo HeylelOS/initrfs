@@ -8,41 +8,50 @@ EOF
 	exit $1
 }
 
-set -e
-
 while getopts ha:i:c: opt
 do
 	case $opt in
 	h) usage 0 ;;
-	a) initramfs="$PWD/$OPTARG" ;;
-	i) init="$PWD/$OPTARG" ;;
-	c) candidates="$PWD/$OPTARG" ;;
+	a) initramfs="`pwd`/$OPTARG" ;;
+	i) init="`pwd`/$OPTARG" ;;
+	c) candidates="`pwd`/$OPTARG" ;;
 	*) usage 1 ;;
 	esac
 done
 
-if [ -z $initramfs ] || [ -z $init ] || [ -z $candidates ]
-then usage 1
-fi
+[ -z $initramfs ] && usage 1
 
-if [ `id -u` -ne 0 ]
+mkinitramfs_cp_init() {
+	if [ ! -z "$1" ]
+	then
+		if mkdir dev mnt && cp "$init" init
+		then return 0
+		else return 1
+		fi
+	else return 0
+	fi
+}
+
+mkinitramfs_cp_candidates() {
+	if [ ! -z "$1" ]
+	then
+		cp "$1" candidates
+		return $?
+	else return 0
+	fi
+}
+
+if tempdir=`mktemp -d /tmp/mkinitramfs.XXXXXX`
 then
-	echo "$0 must be used as root"
-	exit 1
+	cd "$tempdir"
+
+	if mkinitramfs_cp_init "$init" &&
+		mkinitramfs_cp_candidates "$candidates" &&
+		find . | cpio -oH newc | gzip -9 > "$initramfs"
+	then echo "Created $initramfs"
+	else echo "Unable to create initramfs"
+	fi
+
+	cd && rm -rf "$tempdir"
 fi
-
-tempdir=`mktemp -d /tmp/mkinitramfs.XXXXXX`
-cd "$tempdir"
-
-if mkdir dev mnt &&
-	cp "$candidates" candidates &&
-	cp "$init" init &&
-	chown -R 0:0 "$tempdir" &&
-	find . | cpio -oH newc | gzip -9 > "$initramfs"
-then echo "Created $initramfs"
-else echo "Unable to create initramfs"
-fi
-
-cd
-rm -rf "$tempdir"
 
