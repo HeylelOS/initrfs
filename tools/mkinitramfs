@@ -21,36 +21,25 @@ done
 
 [ -z $initramfs ] && usage 1
 
-mkinitramfs_cp_init() {
-	if [ ! -z "$1" ]
-	then
-		if mkdir dev mnt && cp "$init" init
-		then return 0
-		else return 1
-		fi
-	else return 0
-	fi
-}
-
-mkinitramfs_cp_candidates() {
-	if [ ! -z "$1" ]
-	then
-		cp "$1" candidates
-		return $?
-	else return 0
-	fi
-}
-
 if tempdir=`mktemp -d /tmp/mkinitramfs.XXXXXX`
 then
+	set -e
 	cd "$tempdir"
 
-	if mkinitramfs_cp_init "$init" &&
-		mkinitramfs_cp_candidates "$candidates" &&
-		find . | cpio -oH newc | gzip -9 > "$initramfs"
-	then echo "Created $initramfs"
-	else echo "Unable to create initramfs"
+	if [ ! -z "$init" ]
+	then
+		mkdir dev mnt
+		cp "$init" init
 	fi
+
+	if [ ! -z "$candidates" ]
+	then
+		cp "$candidates" candidates
+	fi
+
+	find . | cpio -oH newc | gzip -9 > "$initramfs"
+
+	echo "Created $initramfs"
 
 	cd && rm -rf "$tempdir"
 fi
