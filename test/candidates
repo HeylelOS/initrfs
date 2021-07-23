@@ -1,2 +1,0 @@
-sda ext4 defaults /bin/sh /etc/fstab
-sda ext4 ro /bin/sh none
