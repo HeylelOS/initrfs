@@ -1,4 +1,5 @@
 #include "configuration.h"
+#include "trimstr.h"
 
 #include <string.h>
 #include <ctype.h>
@@ -11,35 +12,12 @@ configuration_line(char *line, size_t length, char **trimmedp) {
 		length = comment - line;
 	}
 
-	/* Trim the beginning */
-	while(isspace(*line)) {
-		length--;
-		line++;
-	}
-
-	/* Trim the end */
-	while(isspace(line[length - 1])) {
-		length--;
-	}
-	/* If there wasn't anything to end-trim, no problem,
-	we will just be replacing the previous nul delimiter */
-	line[length] = '\0';
+	line = trimstr(line, length);
 
 	bool retval = true;
 	if(*line == '[' && line[length - 1] == ']') {
-		/* We are a new section delimiter */
-		/* Trim begnning of section name */
-		do {
-			length--;
-			line++;
-		} while(isspace(*line));
-
-		/* Trim end of section name */
-		do {
-			length--;
-		} while(isspace(line[length - 1]));
-		line[length] = '\0';
-
+		/* We are a new section delimiter, trim name */
+		line = trimstr(line + 1, length - 1);
 		retval = false;
 	}
 

@@ -105,6 +105,26 @@ mkinitrfs_output_file(FILE *output, int fd, uint32_t mode, const char *filename)
 }
 
 static int
+mkinitrfs_output_directories(FILE *output, const char **pathnames, size_t count) {
+	const struct cpio_newc_header header = {
+		.mode = C_ISDIR | 755,
+		.nlink = 1
+	};
+
+	while(count != 0) {
+
+		if(mkinitrfs_output_entry(output, &header, *pathnames) != 0) {
+			return -1;
+		}
+
+		pathnames++;
+		count--;
+	}
+
+	return 0;
+}
+
+static int
 mkinitrfs_output_trailer(FILE *output) {
 	const struct cpio_newc_header header = { .nlink = 1 };
 
@@ -121,8 +141,12 @@ mkinitrfs_output(FILE *output, const struct mkinitrfs_args *args) {
 	int retval = -1;
 
 	if(fd >= 0) {
+		static const char *directories[] = {
+			"dev", "mnt", "proc"
+		};
 
 		if(mkinitrfs_output_file(output, fd, C_ISREG | 0744, "init") == 0
+			&& mkinitrfs_output_directories(output, directories, sizeof(directories) / sizeof(*directories)) == 0
 			&& mkinitrfs_output_trailer(output) == 0) {
 			retval = 0;
 		}
