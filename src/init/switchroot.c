@@ -1,13 +1,12 @@
 #include "switchroot.h"
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
 #include <sys/mount.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <err.h>
 
 static void
 obliterate_directory(int fd) {
@@ -15,8 +14,7 @@ obliterate_directory(int fd) {
 	struct dirent *entry;
 
 	if(dirp == NULL) {
-		fprintf(stderr, "initrfs: fdopendir: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
+		err(1, "fdopendir");
 	}
 
 	while(errno = 0, entry = readdir(dirp), entry != NULL) {
@@ -27,8 +25,7 @@ obliterate_directory(int fd) {
 				int entryfd = openat(dirfd(dirp), entry->d_name, O_RDONLY);
 
 				if(entryfd < 0) {
-					fprintf(stderr, "initrfs: openat: %s\n", strerror(errno));
-					exit(EXIT_FAILURE);
+					err(1, "openat");
 				}
 
 				obliterate_directory(entryfd);
@@ -37,20 +34,17 @@ obliterate_directory(int fd) {
 			}
 
 			if(unlinkat(dirfd(dirp), entry->d_name, flags) != 0) {
-				fprintf(stderr, "initrfs: unlinkat: %s\n", strerror(errno));
-				exit(EXIT_FAILURE);
+				err(1, "unlinkat");
 			}
 		}
 	}
 
 	if(errno != 0) {
-		fprintf(stderr, "initrfs: readdir: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
+		err(1, "readdir");
 	}
 
 	if(closedir(dirp) != 0) {
-		fprintf(stderr, "initrfs: closedir: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
+		err(1, "closedir");
 	}
 }
 
@@ -59,23 +53,19 @@ switch_root(const char *rootmnt) {
 	int oldrootfd = open("/", O_RDONLY);
 
 	if(oldrootfd == -1) {
-		fprintf(stderr, "initrfs: Unable to open /");
-		exit(EXIT_FAILURE);
+		errx(1, "Unable to open /");
 	}
 
 	if(chdir(rootmnt) == -1) {
-		fprintf(stderr, "initrfs: Unable to chdir to %s: %s\n", rootmnt, strerror(errno));
-		exit(EXIT_FAILURE);
+		err(1, "Unable to chdir to %s", rootmnt);
 	}
 
 	if(mount(rootmnt, "/", NULL, MS_MOVE, NULL) == -1) {
-		fprintf(stderr, "initrfs: Unable to move %s to /: %s\n", rootmnt, strerror(errno));
-		exit(EXIT_FAILURE);
+		err(1, "Unable to move %s to /", rootmnt);
 	}
 
 	if(chroot(".") == -1) {
-		fprintf(stderr, "initrfs: Unable to chroot to new root: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
+		err(1, "Unable to chroot to new root");
 	}
 
 	obliterate_directory(oldrootfd);
