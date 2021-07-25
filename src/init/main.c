@@ -3,15 +3,11 @@
 #include "switchroot.h"
 #include "mountutils.h"
 
+#include <stdnoreturn.h>
 #include <unistd.h>
 #include <err.h>
 
-static void
-configure_system(const char *configsys, const char **initp) {
-	/* TODO */
-}
-
-static void _Noreturn
+static void noreturn
 init_system(const char *init) {
 	char * const argv[] = {
 		"init", NULL

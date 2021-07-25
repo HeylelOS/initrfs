@@ -36,10 +36,18 @@ mount_resolve_device(const char *device) {
 	static char buffer[INTERNAL_BUFFER_CAPACITY_DEVICE];
 
 	if(*device != '/') {
-		/* Only the device is specified (eg. 'sda') */
-		static const char dev[] = "/dev/";
-		strncpy(buffer, dev, sizeof(dev) - 1);
-		strncpy(buffer + sizeof(dev) - 1, device, sizeof(buffer) - (sizeof(dev) - 1));
+		if(strchr(device, '/') != NULL) {
+			/* Relative paths are invalid */
+			errx(1, "Invalid relative device path '%s'", device);
+		} else if(strcmp("none", device) == 0) {
+			/* None expands to empty string */
+			strncpy(buffer, "", sizeof(buffer));
+		} else {
+			/* Only the device is specified (eg. 'sda') */
+			static const char dev[] = "/dev/";
+			strncpy(buffer, dev, sizeof(dev) - 1);
+			strncpy(buffer + sizeof(dev) - 1, device, sizeof(buffer) - (sizeof(dev) - 1));
+		}
 	} else {
 		/* Absolute path is specified */
 		strncpy(buffer, device, sizeof(buffer));
@@ -66,6 +74,10 @@ mount_resolve_fstype(const char *fstype) {
 }
 
 unsigned long
-mount_resolve_flags(const char *flags) {
+mount_resolve_options(const char *options, const char **datap) {
+	/* TODO */
+
+	*datap = NULL;
+
 	return 0;
 }

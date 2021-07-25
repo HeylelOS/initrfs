@@ -11,7 +11,7 @@
 
 #define INTERNAL_BUFFER_CAPACITY_INIT 128
 
-static const char *
+const char *
 kernel_cmdline_init(const char *init) {
 	static char buffer[INTERNAL_BUFFER_CAPACITY_INIT];
 
@@ -43,7 +43,7 @@ kernel_cmdline_parse_option_value(struct kernel_cmdline *cmdline, const char *op
 	}
 
 	if(strcmp("rootflags", option) == 0) {
-		cmdline->rootflags = mount_resolve_flags(value);
+		cmdline->rootflags = mount_resolve_options(value, &cmdline->rootdata);
 		return;
 	}
 
@@ -103,7 +103,7 @@ kernel_cmdline_mount_root(const struct kernel_cmdline *cmdline, const char *root
 		while(left = sleep(left), left != 0);
 	}
 
-	if(mount(cmdline->root, rootmnt, cmdline->rootfstype, cmdline->rootflags, NULL) != 0) {
+	if(mount(cmdline->root, rootmnt, cmdline->rootfstype, cmdline->rootflags, cmdline->rootdata) != 0) {
 		err(1, "Unable to mount '%s' (%s) to '%s'", cmdline->root, cmdline->rootfstype, rootmnt);
 	}
 }
