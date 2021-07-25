@@ -20,7 +20,7 @@ const char *
 mount_resolve_fstype(const char *fstype);
 
 unsigned long
-mount_resolve_flags(const char *flags);
+mount_resolve_options(const char *flags, const char **datap);
 
 /* MOUNTUTILS_H */
 #endif
