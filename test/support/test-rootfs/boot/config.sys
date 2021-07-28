@@ -1,0 +1,5 @@
+[fstab]
+/dev/sda / ext4 rw,relatime,data=ordered 0 1
+none /dev devtmpfs defaults
+none /proc proc defaults
+none /sys sysfs defaults

@@ -1,0 +1,3 @@
+# initrfs
+
+Minimal initramfs
