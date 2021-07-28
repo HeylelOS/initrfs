@@ -1,6 +1,8 @@
 #ifndef MOUNTUTILS_H
 #define MOUNTUTILS_H
 
+#include <stddef.h>
+
 struct mount_description {
 	const char *source, *target;
 	const char *fstype, *data;
@@ -20,7 +22,7 @@ const char *
 mount_resolve_fstype(const char *fstype);
 
 unsigned long
-mount_resolve_options(const char *flags, const char **datap);
+mount_resolve_options(const char *options, char *databuffer, size_t datasize);
 
 /* MOUNTUTILS_H */
 #endif

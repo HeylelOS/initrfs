@@ -13,6 +13,10 @@ init_system(const char *init) {
 		"init", NULL
 	};
 
+	if(init == NULL) {
+		init = "/sbin/init";
+	}
+
 	execv(init, argv);
 	err(1, "Unable to execv %s", init);
 }
@@ -26,9 +30,7 @@ main(void) {
 	};
 	static const char rootmnt[] = "/mnt";
 	static const char configsys[] = "/boot/config.sys";
-	struct kernel_cmdline cmdline = {
-		.init = "/sbin/init",
-	};
+	struct kernel_cmdline cmdline = { };
 
 	mount_filesystems(support);
 
@@ -39,7 +41,7 @@ main(void) {
 
 	switch_root(rootmnt);
 
-	configure_system(configsys, &cmdline.init);
+	configure_system(configsys);
 
 	init_system(cmdline.init);
 

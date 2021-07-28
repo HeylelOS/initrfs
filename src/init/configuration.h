@@ -2,7 +2,7 @@
 #define CONFIGURATION_H
 
 void
-configure_system(const char *configsys, const char **initp);
+configure_system(const char *configsys);
 
 /* CONFIGURATION_H */
 #endif
