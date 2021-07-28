@@ -10,6 +10,7 @@
 #include <err.h>
 
 #define INTERNAL_BUFFER_CAPACITY_INIT 128
+#define INTERNAL_BUFFER_CAPACITY_ROOTDATA 128
 
 const char *
 kernel_cmdline_init(const char *init) {
@@ -43,7 +44,9 @@ kernel_cmdline_parse_option_value(struct kernel_cmdline *cmdline, const char *op
 	}
 
 	if(strcmp("rootflags", option) == 0) {
-		cmdline->rootflags = mount_resolve_options(value, &cmdline->rootdata);
+		static char rootdata[INTERNAL_BUFFER_CAPACITY_ROOTDATA];
+		cmdline->rootflags = mount_resolve_options(value, rootdata, sizeof(rootdata));
+		cmdline->rootdata = rootdata;
 		return;
 	}
 

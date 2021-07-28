@@ -13,7 +13,7 @@ add_custom_command(
 add_custom_target(test-disk ALL DEPENDS disk.img)
 add_custom_command(
 	OUTPUT disk.img
-	COMMAND /sbin/mke2fs -t ext4 -d rootfs disk.img 1M
+	COMMAND mke2fs -q -t ext4 -d rootfs disk.img 5M
 	DEPENDS test-init
 )
 
