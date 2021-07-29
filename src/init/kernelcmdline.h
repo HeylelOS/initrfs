@@ -2,16 +2,13 @@
 #define KERNELCMDLINE_H
 
 struct kernel_cmdline {
-	const char *init;
-	const char *root;
-	const char *rootfstype;
-	const char *rootdata;
+	char *init;
+	char *root;
+	char *rootfstype;
+	char *rootdata;
 	unsigned long rootflags;
 	unsigned long rootdelay;
 };
-
-const char *
-kernel_cmdline_init(const char *init);
 
 void
 kernel_cmdline_parse(struct kernel_cmdline *cmdline);
