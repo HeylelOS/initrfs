@@ -10,8 +10,6 @@
 #include <ctype.h>
 #include <err.h>
 
-#define INTERNAL_BUFFER_CAPACITY_ROOTDATA 128
-
 enum configuration_section {
 	CONFIGURATION_SECTION_FSTAB,
 	CONFIGURATION_SECTION_MODTAB,
@@ -90,19 +88,18 @@ configure_section_fstab(char *tab) {
 	const char * const options = tab_field(&tab);
 	const unsigned long freq = strtoul(tab_field(&tab), NULL, 0);
 	const unsigned long passno = strtoul(tab_field(&tab), NULL, 0);
-	char data[INTERNAL_BUFFER_CAPACITY_ROOTDATA];
+	char *data;
 
-	desc.flags = mount_resolve_options(options, data, sizeof(data));
+	desc.flags = mount_resolve_options(options, &data);
 	desc.data = data;
 
-	if(strcmp("/", desc.target) == 0) {
-		/* Discard root tab */
-		return;
+	if(strcmp("/", desc.target) != 0) {
+		if(mount(desc.source, desc.target, desc.fstype, desc.flags, desc.data) != 0) {
+			err(1, "Unable to mount root '%s' (%s) to '%s'", desc.source, desc.fstype, desc.target);
+		}
 	}
 
-	if(mount(desc.source, desc.target, desc.fstype, desc.flags, desc.data) != 0) {
-		err(1, "Unable to mount root '%s' (%s) to '%s'", desc.source, desc.fstype, desc.target);
-	}
+	free(data);
 }
 
 static void

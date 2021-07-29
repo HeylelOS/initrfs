@@ -9,44 +9,41 @@
 #include <unistd.h>
 #include <err.h>
 
-#define INTERNAL_BUFFER_CAPACITY_INIT 128
-#define INTERNAL_BUFFER_CAPACITY_ROOTDATA 128
-
-const char *
+static char *
 kernel_cmdline_init(const char *init) {
-	static char buffer[INTERNAL_BUFFER_CAPACITY_INIT];
+	char * const copy = strdup(init);
 
-	strncpy(buffer, init, sizeof(buffer));
-
-	if(buffer[sizeof(buffer) - 1] != '\0') {
+	if(copy == NULL) {
 		errx(1, "init path '%s' is too long", init);
 	}
 
-	return buffer;
+	return copy;
 }
 
 static void
 kernel_cmdline_parse_option_value(struct kernel_cmdline *cmdline, const char *option, const char *value) {
 
 	if(strcmp("init", option) == 0) {
+		free(cmdline->init);
 		cmdline->init = kernel_cmdline_init(value);
 		return;
 	}
 
 	if(strcmp("root", option) == 0) {
+		free(cmdline->root);
 		cmdline->root = mount_resolve_device(value);
 		return;
 	}
 
 	if(strcmp("rootfstype", option) == 0) {
+		free(cmdline->rootfstype);
 		cmdline->rootfstype = mount_resolve_fstype(value);
 		return;
 	}
 
 	if(strcmp("rootflags", option) == 0) {
-		static char rootdata[INTERNAL_BUFFER_CAPACITY_ROOTDATA];
-		cmdline->rootflags = mount_resolve_options(value, rootdata, sizeof(rootdata));
-		cmdline->rootdata = rootdata;
+		free(cmdline->rootdata);
+		cmdline->rootflags = mount_resolve_options(value, &cmdline->rootdata);
 		return;
 	}
 
@@ -58,11 +55,19 @@ kernel_cmdline_parse_option_value(struct kernel_cmdline *cmdline, const char *op
 
 static void
 kernel_cmdline_parse_option(struct kernel_cmdline *cmdline, const char *option) {
+
+	if(strcmp("rw", option) == 0) {
+		cmdline->rootflags &= ~MS_RDONLY;
+	}
+
+	if(strcmp("ro", option) == 0) {
+		cmdline->rootflags |= MS_RDONLY;
+	}
 }
 
 void
 kernel_cmdline_parse(struct kernel_cmdline *cmdline) {
-	const char filename[] = "/proc/cmdline";
+	static const char filename[] = "/proc/cmdline";
 	FILE *filep = fopen(filename, "r");
 
 	if(filep == NULL) {

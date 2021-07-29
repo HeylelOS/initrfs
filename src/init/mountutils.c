@@ -1,12 +1,10 @@
 #include "mountutils.h"
 
+#include <stdlib.h>
 #include <string.h>
 #include <sys/mount.h>
 #include <linux/mount.h>
 #include <err.h>
-
-#define INTERNAL_BUFFER_CAPACITY_DEVICE 128
-#define INTERNAL_BUFFER_CAPACITY_FSTYPE 16
 
 struct mount_option {
 	unsigned long mask;
@@ -37,9 +35,9 @@ unmount_filesystems(const struct mount_description *description) {
 	}
 }
 
-const char *
+char *
 mount_resolve_device(const char *device) {
-	static char buffer[INTERNAL_BUFFER_CAPACITY_DEVICE];
+	char *path;
 
 	if(*device != '/') {
 		if(strchr(device, '/') != NULL) {
@@ -47,36 +45,39 @@ mount_resolve_device(const char *device) {
 			errx(1, "Invalid relative device path '%s'", device);
 		} else if(strcmp("none", device) == 0) {
 			/* None expands to empty string */
-			strncpy(buffer, "", sizeof(buffer));
+			path = strdup("");
 		} else {
 			/* Only the device is specified (eg. 'sda') */
 			static const char dev[] = "/dev/";
+			const size_t length = strlen(device);
+			char buffer[sizeof(dev) + length];
+
 			strncpy(buffer, dev, sizeof(dev) - 1);
-			strncpy(buffer + sizeof(dev) - 1, device, sizeof(buffer) - (sizeof(dev) - 1));
+			strncpy(buffer + sizeof(dev) - 1, device, length + 1);
+
+			path = strdup(buffer);
 		}
 	} else {
 		/* Absolute path is specified */
-		strncpy(buffer, device, sizeof(buffer));
+		path = strdup(device);
 	}
 
-	if(buffer[sizeof(buffer) - 1] != '\0') {
+	if(path == NULL) {
 		errx(1, "Device name '%s' is too long", device);
 	}
 
-	return buffer;
+	return path;
 }
 
-const char *
+char *
 mount_resolve_fstype(const char *fstype) {
-	static char buffer[INTERNAL_BUFFER_CAPACITY_FSTYPE];
+	char * const copy = strdup(fstype);
 
-	strncpy(buffer, fstype, sizeof(buffer));
-
-	if(buffer[sizeof(buffer) - 1] != '\0') {
+	if(copy == NULL) {
 		errx(1, "Filesystem type name '%s' is too long", fstype);
 	}
 
-	return buffer;
+	return copy;
 }
 
 static const char *
@@ -127,10 +128,9 @@ static const struct mount_option mountoptions[] = {
 };
 
 unsigned long
-mount_resolve_options(const char *options, char *databuffer, size_t datasize) {
+mount_resolve_options(const char *options, char **datap) {
 	unsigned long flags = 0;
-
-	memset(databuffer, 0, datasize);
+	char *data = NULL;
 
 	size_t keylen, optionlen;
 	const char *option;
@@ -163,15 +163,17 @@ mount_resolve_options(const char *options, char *databuffer, size_t datasize) {
 				warnx("Unknown mount option '%.*s'", (int)optionlen, option);
 			}
 		} else if(strncmp("data", option, keylen) == 0) {
-			const char *value = option + keylen + 1;
 
-			strncpy(databuffer, value, datasize);
-			if(databuffer[datasize - 1] != '\0') {
-				warnx("Mount data option too long for buffer of size %lu in '%*s'", datasize, (int)optionlen, option);
-				memset(databuffer, 0, datasize);
+			free(data);
+			data = strndup(option + keylen + 1, optionlen - keylen - 1);
+
+			if(data != NULL) {
+				warnx("Mount data option too long '%*s'", (int)optionlen, option);
 			}
 		}
 	}
+
+	*datap = data;
 
 	return flags;
 }

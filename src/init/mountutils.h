@@ -15,14 +15,14 @@ mount_filesystems(const struct mount_description *description);
 void
 unmount_filesystems(const struct mount_description *description);
 
-const char *
+char *
 mount_resolve_device(const char *device);
 
-const char *
+char *
 mount_resolve_fstype(const char *fstype);
 
 unsigned long
-mount_resolve_options(const char *options, char *databuffer, size_t datasize);
+mount_resolve_options(const char *options, char **datap);
 
 /* MOUNTUTILS_H */
 #endif
