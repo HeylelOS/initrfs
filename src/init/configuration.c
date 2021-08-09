@@ -8,6 +8,7 @@
 #include <sys/mount.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
 #include <err.h>
 
 enum configuration_section {
@@ -93,10 +94,9 @@ configure_section_fstab(char *tab) {
 	desc.flags = mount_resolve_options(options, &data);
 	desc.data = data;
 
-	if(strcmp("/", desc.target) != 0) {
-		if(mount(desc.source, desc.target, desc.fstype, desc.flags, desc.data) != 0) {
-			err(1, "Unable to mount root '%s' (%s) to '%s'", desc.source, desc.fstype, desc.target);
-		}
+	/* EBUSY is sorta trying a remount, which we can just discard at this point. */
+	if(mount(desc.source, desc.target, desc.fstype, desc.flags, desc.data) != 0 && errno != EBUSY) {
+		err(1, "Unable to mount root '%s' (%s) to '%s'", desc.source, desc.fstype, desc.target);
 	}
 
 	free(data);

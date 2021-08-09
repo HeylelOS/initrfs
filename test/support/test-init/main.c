@@ -9,10 +9,7 @@ main(void) {
 
 	puts("Hello, world!");
 
-	if(reboot(RB_AUTOBOOT) == -1) {
-		err(EXIT_FAILURE, "reboot");
-	}
-
-	/* Never reached */
+	reboot(RB_AUTOBOOT);
+	err(EXIT_FAILURE, "reboot");
 }
 

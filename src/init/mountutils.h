@@ -1,8 +1,6 @@
 #ifndef MOUNTUTILS_H
 #define MOUNTUTILS_H
 
-#include <stddef.h>
-
 struct mount_description {
 	const char *source, *target;
 	const char *fstype, *data;
