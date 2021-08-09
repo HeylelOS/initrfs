@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mount.h>
-#include <linux/mount.h>
 #include <err.h>
 
 struct mount_option {
@@ -168,7 +167,7 @@ mount_resolve_options(const char *options, char **datap) {
 			data = strndup(option + keylen + 1, optionlen - keylen - 1);
 
 			if(data != NULL) {
-				warnx("Mount data option too long '%*s'", (int)optionlen, option);
+				warnx("Mount data option too long '%.*s'", (int)optionlen, option);
 			}
 		}
 	}

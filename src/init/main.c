@@ -3,6 +3,7 @@
 #include "switchroot.h"
 #include "mountutils.h"
 
+#include <stddef.h>
 #include <stdnoreturn.h>
 #include <unistd.h>
 #include <err.h>
