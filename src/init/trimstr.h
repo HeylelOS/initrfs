@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
 #ifndef TRIMSTR_H
 #define TRIMSTR_H
 

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
 .section ".note.GNU-stack","",@progbits
 .text
 

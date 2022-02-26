@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
 #include <stdlib.h>
 
 #include <ctype.h> /* isdigit */
@@ -162,7 +163,6 @@ static void
 free_medium(struct malloc_arena *arena, void *allocation, size_t size) {
 	size_t index = malloc_medium_order(size) - MALLOC_MEDIUMPOOL_MIN_ORDER;
 	void **ptr = allocation;
-	void **iterator;
 
 	do {
 		const long size = 1 << (index + MALLOC_MEDIUMPOOL_MIN_ORDER);

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
 #ifndef _SYS_MOUNT_H
 #define _SYS_MOUNT_H
 

@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
+#define _XOPEN_SOURCE 700
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -158,8 +160,8 @@ mkinitrfs_output(FILE *output, const struct mkinitrfs_args *args) {
 }
 
 static void
-mkinitrfs_usage(const char *mkinitrfsname) {
-	fprintf(stderr, "usage: %s [-I <init>] [<output>]\n", mkinitrfsname);
+mkinitrfs_usage(const char *progname) {
+	fprintf(stderr, "usage: %s [-i <init>] [<output>]\n", progname);
 	exit(EXIT_FAILURE);
 }
 
@@ -170,9 +172,9 @@ mkinitrfs_parse_args(int argc, char **argv) {
 	};
 	int c;
 
-	while((c = getopt(argc, argv, ":I:")) != -1) {
+	while((c = getopt(argc, argv, ":i:")) != -1) {
 		switch(c) {
-		case 'I':
+		case 'i':
 			args.init = optarg;
 			break;
 		case '?':
@@ -202,12 +204,11 @@ mkinitrfs_parse_args(int argc, char **argv) {
 int
 main(int argc, char **argv) {
 	const struct mkinitrfs_args args = mkinitrfs_parse_args(argc, argv);
-	char ** const argpos = argv + optind, ** const argend = argv + argc;
 	int retval = EXIT_SUCCESS;
 
-	if(argpos != argend) {
-		const char *output = *argpos;
-		FILE *filep = fopen(output, "w");
+	if(optind != argc) {
+		const char * const output = argv[optind];
+		FILE * const filep = fopen(output, "w");
 
 		if(filep != NULL) {
 			if(mkinitrfs_output(filep, &args) != 0) {
@@ -228,5 +229,5 @@ main(int argc, char **argv) {
 		}
 	}
 
-	return EXIT_SUCCESS;
+	return retval;
 }

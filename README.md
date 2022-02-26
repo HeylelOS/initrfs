@@ -9,27 +9,13 @@ and executes a single binary executable. It then leverages the kernel's cmdline 
 mount the root filesystem. Once the root filesystem is mounted, it parses a config.sys file,
 which provides fstab and modules arguments.
 
-## Configure, build and install
+## Configure, build and test
 
-CMake is used to configure, build and install binaires and documentations, version 3.14 minimum is required:
-
-```sh
-mkdir -p build && cd build
-cmake ../
-cmake --build .
-cmake --install .
-```
-
-## Tests
-
-There is no real automated test infrastructure yet.
-But you can specify a qemu-system program to verify the validity of the boot sequence.
-Note: mke2fs is used to create the disk image, it is usually located in /sbin, which may not be in your default PATH.
+Meson is used to configure, build and test a basic boot sequence.
 
 ```sh
-mkdir -p build && cd build
-cmake ../
-cmake --build .
-ctest -V
+meson setup build
+meson compile -C build
+# QEMU and mke2fs are required to run tests, see notes in test/meson.build
+meson test -C build
 ```
-

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
 #ifndef _DIRENT_H
 #define _DIRENT_H
 

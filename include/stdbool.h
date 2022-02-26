@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
 #ifndef _STDBOOL_H
 #define _STDBOOL_H
 

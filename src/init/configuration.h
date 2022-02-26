@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 

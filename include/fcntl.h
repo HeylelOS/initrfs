@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
 #ifndef _FCNTL_H
 #define _FCNTL_H
 

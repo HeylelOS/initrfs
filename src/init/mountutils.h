@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
 #ifndef MOUNTUTILS_H
 #define MOUNTUTILS_H
 

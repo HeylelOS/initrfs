@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -xe
+
+sysroot=$1
+configsys=$2
+init=$3
+
+mkdir -p -- "${sysroot}/dev" "${sysroot}/proc" "${sysroot}/sys" "${sysroot}/sbin" "${sysroot}/boot"
+cp -- "${configsys}" "${sysroot}/boot/config.sys"
+cp -- "${init}" "${sysroot}/sbin/init"

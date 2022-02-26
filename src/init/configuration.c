@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
 #include "configuration.h"
 #include "mountutils.h"
 #include "trimstr.h"
@@ -87,8 +88,8 @@ configure_section_fstab(char *tab) {
 		.fstype = tab_field(&tab),
 	};
 	const char * const options = tab_field(&tab);
-	const unsigned long freq = strtoul(tab_field(&tab), NULL, 0);
-	const unsigned long passno = strtoul(tab_field(&tab), NULL, 0);
+	[[gnu::unused]] const unsigned long freq = strtoul(tab_field(&tab), NULL, 0);
+	[[gnu::unused]] const unsigned long passno = strtoul(tab_field(&tab), NULL, 0);
 	char *data;
 
 	desc.flags = mount_resolve_options(options, &data);

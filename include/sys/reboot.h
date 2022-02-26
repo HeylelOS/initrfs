@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
 #ifndef _SYS_REBOOT_H
 #define _SYS_REBOOT_H
 

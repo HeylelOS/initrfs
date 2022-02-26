@@ -1,0 +1,1 @@
+option('vmlinuz', type : 'string', value : '/vmlinuz', description : 'Linux kernel image used for boot test')

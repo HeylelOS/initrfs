@@ -7,7 +7,7 @@
 int
 main(void) {
 
-	puts("Hello, world!");
+	puts("ok boot\n1..1");
 
 	reboot(RB_AUTOBOOT);
 	err(EXIT_FAILURE, "reboot");
