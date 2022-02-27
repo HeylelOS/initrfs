@@ -11,7 +11,7 @@ memchr(const void *pointer, int value, size_t count) {
 	const uint8_t *current = pointer;
 	const uint8_t byte = value;
 
-	while(current != end && *current != byte) {
+	while (current != end && *current != byte) {
 		current++;
 	}
 
@@ -24,7 +24,7 @@ memcpy(void *destination, const void *source, size_t count) {
 	const uint8_t *current = source;
 	uint8_t *buffer = destination;
 
-	while(current != end) {
+	while (current != end) {
 		*buffer = *current;
 		current++;
 		buffer++;
@@ -37,15 +37,15 @@ void *
 memmove(void *destination, const void *source, size_t count) {
 	const void * const upper = (const uint8_t *)source + count;
 
-	if(source > destination || (source < destination && upper < destination)) {
+	if (source > destination || (source < destination && upper < destination)) {
 		/* memcpy copies byte by byte from the beginning, this way is safe */
 		memcpy(destination, source, count);
-	} else if(source != destination) {
+	} else if (source != destination) {
 		const uint8_t * const end = (const uint8_t *)source - 1;
 		const uint8_t *current = (const uint8_t *)upper - 1;
 		uint8_t *buffer = (uint8_t *)destination + count - 1;
 
-		while(current != end) {
+		while (current != end) {
 			*buffer = *current;
 			current--;
 			buffer--;
@@ -61,7 +61,7 @@ memset(void *destination, int value, size_t count) {
 	uint8_t *current = destination;
 	const uint8_t byte = value;
 
-	while(current != end) {
+	while (current != end) {
 		*current = byte;
 		current++;
 	}
@@ -75,7 +75,7 @@ memcmp(const void *lhs, const void *rhs, size_t count) {
 	size_t i = 0;
 	int diff;
 
-	while(i != count && !(diff = left[i] - right[i], diff)) {
+	while (i != count && !(diff = left[i] - right[i], diff)) {
 		i++;
 	}
 
@@ -91,7 +91,7 @@ char *
 strncpy(char *buffer, const char *string, size_t count) {
 	const size_t length = strlen(string);
 
-	if(length < count) {
+	if (length < count) {
 		return memset((uint8_t *)memcpy(buffer, string, length) + length, 0, count - length);
 	} else {
 		return memcpy(buffer, string, count);
@@ -102,11 +102,11 @@ int
 strncmp(const char *lhs, const char *rhs, size_t count) {
 	size_t lhslen = strlen(lhs), rhslen = strlen(rhs);
 
-	if(lhslen < count) {
+	if (lhslen < count) {
 		count = lhslen;
 	}
 
-	if(rhslen < count) {
+	if (rhslen < count) {
 		count = rhslen;
 	}
 
@@ -116,7 +116,7 @@ strncmp(const char *lhs, const char *rhs, size_t count) {
 int
 strcmp(const char *lhs, const char *rhs) {
 
-	while(*lhs != '\0' && *lhs - *rhs == 0) {
+	while (*lhs != '\0' && *lhs - *rhs == 0) {
 		lhs++;
 		rhs++;
 	}
@@ -133,13 +133,13 @@ char *
 strndup(const char *string, size_t count) {
 	const size_t length = strlen(string);
 
-	if(length < count) {
+	if (length < count) {
 		count = length;
 	}
 
 	char * const copy = malloc(count + 1);
 
-	if(copy != NULL) {
+	if (copy != NULL) {
 		((char *)memcpy(copy, string, count))[count] = '\0';
 	}
 
@@ -151,7 +151,7 @@ strdup(const char *string) {
 	const size_t length = strlen(string);
 	char * const copy = malloc(length + 1);
 
-	if(copy != NULL) {
+	if (copy != NULL) {
 		memcpy(copy, string, length + 1);
 	}
 
@@ -162,22 +162,22 @@ char *
 strsep(char **stringp, const char *delimiters) {
 	char * const string = *stringp;
 
-	if(string != NULL) {
+	if (string != NULL) {
 		const char *delimiter;
 		char *token = string;
 
 		/* Iterating our string for a token */
-		while(*token != '\0') {
+		while (*token != '\0') {
 			/* Reset delimiter iterator */
 			delimiter = delimiters;
 
 			/* Is the current character a delimiter? */
-			while(*delimiter != '\0' && *token != *delimiter) {
+			while (*delimiter != '\0' && *token != *delimiter) {
 				delimiter++;
 			}
 
 			/* If it is, break iteration now */
-			if(*delimiter != '\0') {
+			if (*delimiter != '\0') {
 				break;
 			}
 
@@ -185,7 +185,7 @@ strsep(char **stringp, const char *delimiters) {
 		}
 
 		/* Found a delimiter? Mark it, else set next to NULL */
-		if(*token != '\0') {
+		if (*token != '\0') {
 			*token = '\0';
 			*stringp = token + 1;
 		} else {
@@ -236,7 +236,7 @@ static char * const errstrings[] = {
 
 char *
 strerror(int errcode) {
-	if(errcode < 0 || errcode > sizeof(errstrings) / sizeof(*errstrings)) {
+	if (errcode < 0 || errcode > sizeof (errstrings) / sizeof (*errstrings)) {
 		errcode = 0;
 	}
 

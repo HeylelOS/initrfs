@@ -14,7 +14,7 @@ unsigned int
 sleep(unsigned int seconds) {
 	struct timespec rqt = { .tv_sec = seconds }, rmt;
 
-	if(nanosleep(&rqt, &rmt) != 0) {
+	if (nanosleep(&rqt, &rmt) != 0) {
 		return rmt.tv_sec;
 	}
 

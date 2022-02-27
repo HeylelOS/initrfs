@@ -19,11 +19,11 @@ _FILE_input_read(FILE *filep) {
 	const size_t size = 500;
 
 	filep->_ibuffer = realloc(filep->_ibuffer, filep->_icount + size);
-	if(filep->_ibuffer != NULL) {
+	if (filep->_ibuffer != NULL) {
 		char * const begin = filep->_ibuffer + filep->_icount;
 		const ssize_t readval = read(filep->_fd, begin, size);
 
-		if(readval > 0) {
+		if (readval > 0) {
 			filep->_icount += readval;
 			return 0;
 		}
@@ -52,15 +52,15 @@ _stderr() {
 
 FILE *
 fopen(const char *pathname, const char *mode) {
-	FILE *filep = malloc(sizeof(*filep));
+	FILE *filep = malloc(sizeof (*filep));
 
-	if(filep != NULL) {
+	if (filep != NULL) {
 		/* Runtime only supports file reading, mode is ignored */
 		filep->_ibuffer = NULL;
 		filep->_icount = 0;
 		filep->_fd = open(pathname, O_RDONLY, 0666);
 
-		if(filep->_fd < 0) {
+		if (filep->_fd < 0) {
 			free(filep);
 			filep = NULL;
 		}
@@ -88,12 +88,12 @@ _strredup(char **destp, size_t *capacityp, const char *src, size_t length) {
 	size_t capacity = *capacityp;
 	char *dest = *destp;
 
-	if(length >= capacity) {
+	if (length >= capacity) {
 		capacity = length + 1;
 		dest = realloc(dest, capacity);
 	}
 
-	if(dest != NULL) {
+	if (dest != NULL) {
 
 		((unsigned char *)memcpy(dest, src, length))[length] = '\0';
 		*capacityp = capacity;
@@ -112,12 +112,12 @@ getdelim(char **linep, size_t *capacityp, int delimiter, FILE *filep) {
 	do {
 		/* Look for a delimition, if none found, try to fill more of the input buffer */
 		eod = memchr(filep->_ibuffer, delimiter, filep->_icount);
-	} while(eod == NULL && _FILE_input_read(filep) == 0);
+	} while (eod == NULL && _FILE_input_read(filep) == 0);
 
 	/* If none is found at this point,
 	 * we reached end of file, delimition is set to remainder of input.
 	 * Else if we are delimited, we set the delimition end past the delimiter. */
-	if(eod == NULL) {
+	if (eod == NULL) {
 		eod = filep->_ibuffer + filep->_icount;
 	} else {
 		eod++;
@@ -126,10 +126,10 @@ getdelim(char **linep, size_t *capacityp, int delimiter, FILE *filep) {
 	/* If the input buffer is empty, we reached end of file,
 	 * whether eod is NULL or not. Else, if eod is not NULL,
 	 * we have at least one delimition to eat. */
-	if(filep->_icount != 0 && eod != NULL) {
+	if (filep->_icount != 0 && eod != NULL) {
 		const size_t length = eod - filep->_ibuffer;
 
-		if(_strredup(linep, capacityp, filep->_ibuffer, length) == 0) {
+		if (_strredup(linep, capacityp, filep->_ibuffer, length) == 0) {
 			const size_t moved = filep->_icount - length;
 
 			memmove(filep->_ibuffer, eod, moved);
@@ -146,7 +146,7 @@ int
 fputc(int value, FILE *filep) {
 	const unsigned char character = value;
 
-	if(write(filep->_fd, &character, sizeof(character)) != sizeof(character)) {
+	if (write(filep->_fd, &character, sizeof (character)) != sizeof (character)) {
 		return EOF;
 	}
 
@@ -162,7 +162,7 @@ int
 puts(const char *string) {
 	const size_t length = strlen(string);
 
-	if(write(stdout->_fd, string, length) == length && fputc('\n', stdout) != EOF) {
+	if (write(stdout->_fd, string, length) == length && fputc('\n', stdout) != EOF) {
 		return length + 1;
 	} else {
 		return EOF;
@@ -193,7 +193,7 @@ _formatter_print(struct _formatter *formatter, const char *newtag, enum _formatt
 	const size_t count = formatter->location - formatter->tag;
 	const ssize_t written = write(formatter->fd, formatter->tag, count);
 
-	if(written == count) {
+	if (written == count) {
 		formatter->tag = newtag;
 		formatter->total += count;
 		formatter->state = success;
@@ -206,7 +206,7 @@ static inline size_t
 _formatter_convert_string_count(const char *string, int precision) {
 	size_t count = strlen(string);
 
-	if(precision > 0 && precision < count) {
+	if (precision > 0 && precision < count) {
 		count = precision;
 	}
 
@@ -216,14 +216,14 @@ _formatter_convert_string_count(const char *string, int precision) {
 static void
 _formatter_convert_string(struct _formatter *formatter, const char *string, enum _formatter_state success) {
 
-	if(string == NULL) {
+	if (string == NULL) {
 		string = "(nil)";
 	}
 
 	const size_t count = _formatter_convert_string_count(string, formatter->precision);
 	const ssize_t written = write(formatter->fd, string, count);
 
-	if(written == count) {
+	if (written == count) {
 		formatter->tag = formatter->location + 1;
 		formatter->total += count;
 		formatter->state = success;
@@ -243,17 +243,17 @@ vfprintf(FILE *filep, const char *format, va_list ap) {
 		.fd = filep->_fd,
 	};
 
-	while(formatter.state < _FORMATTER_STATE_END) {
-		switch(formatter.state) {
+	while (formatter.state < _FORMATTER_STATE_END) {
+		switch (formatter.state) {
 		case _FORMATTER_STATE_PRINT:
-			switch(*formatter.location) {
+			switch (*formatter.location) {
 			case '%': _formatter_print(&formatter, formatter.location, _FORMATTER_STATE_PERCENT); break;
 			case '\0': _formatter_print(&formatter, formatter.location, _FORMATTER_STATE_END); break;
 			default: break;
 			}
 			break;
 		case _FORMATTER_STATE_PERCENT:
-			switch(*formatter.location) {
+			switch (*formatter.location) {
 			case '.':
 				formatter.precision = 0;
 				formatter.state = _FORMATTER_STATE_PERCENT_DOT;
@@ -266,7 +266,7 @@ vfprintf(FILE *filep, const char *format, va_list ap) {
 			}
 			break;
 		case _FORMATTER_STATE_PERCENT_DOT:
-			switch(*formatter.location) {
+			switch (*formatter.location) {
 			case '*':
 				formatter.precision = va_arg(ap, int);
 				formatter.state = _FORMATTER_STATE_PERCENT_DOT_STAR;
@@ -275,7 +275,7 @@ vfprintf(FILE *filep, const char *format, va_list ap) {
 			}
 			break;
 		case _FORMATTER_STATE_PERCENT_DOT_STAR:
-			switch(*formatter.location) {
+			switch (*formatter.location) {
 			case 's': _formatter_convert_string(&formatter, va_arg(ap, const char *), _FORMATTER_STATE_PRINT); break;
 			default: formatter.state = _FORMATTER_STATE_ERROR_UNFINISHED_CONVERSION; break;
 			}

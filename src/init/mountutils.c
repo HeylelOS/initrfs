@@ -14,11 +14,11 @@ struct mount_option {
 void
 mount_filesystems(const struct mount_description *description) {
 
-	while(description->source != NULL && mount(description->source, description->target, description->fstype, description->flags, description->data) == 0) {
+	while (description->source != NULL && mount(description->source, description->target, description->fstype, description->flags, description->data) == 0) {
 		description++;
 	}
 
-	if(description->source != NULL) {
+	if (description->source != NULL) {
 		err(1, "Unable to mount filesystem '%s' (%s)", description->target, description->fstype);
 	}
 }
@@ -26,11 +26,11 @@ mount_filesystems(const struct mount_description *description) {
 void
 unmount_filesystems(const struct mount_description *description) {
 
-	while(description->source != NULL && umount(description->target) == 0) {
+	while (description->source != NULL && umount(description->target) == 0) {
 		description++;
 	}
 
-	if(description->source != NULL) {
+	if (description->source != NULL) {
 		err(1, "Unable to unmount filesystem '%s' (%s)", description->target, description->fstype);
 	}
 }
@@ -39,21 +39,21 @@ char *
 mount_resolve_device(const char *device) {
 	char *path;
 
-	if(*device != '/') {
-		if(strchr(device, '/') != NULL) {
+	if (*device != '/') {
+		if (strchr(device, '/') != NULL) {
 			/* Relative paths are invalid */
 			errx(1, "Invalid relative device path '%s'", device);
-		} else if(strcmp("none", device) == 0) {
+		} else if (strcmp("none", device) == 0) {
 			/* None expands to empty string */
 			path = strdup("");
 		} else {
 			/* Only the device is specified (eg. 'sda') */
 			static const char dev[] = "/dev/";
 			const size_t length = strlen(device);
-			char buffer[sizeof(dev) + length];
+			char buffer[sizeof (dev) + length];
 
-			strncpy(buffer, dev, sizeof(dev) - 1);
-			strncpy(buffer + sizeof(dev) - 1, device, length + 1);
+			strncpy(buffer, dev, sizeof (dev) - 1);
+			strncpy(buffer + sizeof (dev) - 1, device, length + 1);
 
 			path = strdup(buffer);
 		}
@@ -62,7 +62,7 @@ mount_resolve_device(const char *device) {
 		path = strdup(device);
 	}
 
-	if(path == NULL) {
+	if (path == NULL) {
 		errx(1, "Device name '%s' is too long", device);
 	}
 
@@ -73,7 +73,7 @@ char *
 mount_resolve_fstype(const char *fstype) {
 	char * const copy = strdup(fstype);
 
-	if(copy == NULL) {
+	if (copy == NULL) {
 		errx(1, "Filesystem type name '%s' is too long", fstype);
 	}
 
@@ -84,7 +84,7 @@ static const char *
 strchrnul(const char *string, int c) {
 	const char *end = strchr(string, c);
 
-	if(end == NULL) {
+	if (end == NULL) {
 		end = string + strlen(string);
 	}
 
@@ -101,7 +101,7 @@ mount_option_next(const char **optionsp, const char **optionp, size_t *optionlen
 	*optionlenp = optionlen;
 	*keylenp = key == NULL ? optionlen : key - option;
 
-	if(option[optionlen] != '\0') {
+	if (option[optionlen] != '\0') {
 		*optionsp = option + optionlen + 1;
 		return 0;
 	} else {
@@ -134,24 +134,24 @@ mount_resolve_options(const char *options, char **datap) {
 
 	size_t keylen, optionlen;
 	const char *option;
-	while(mount_option_next(&options, &option, &optionlen, &keylen) == 0) {
-		if(optionlen == keylen) {
+	while (mount_option_next(&options, &option, &optionlen, &keylen) == 0) {
+		if (optionlen == keylen) {
 
-			if(strncmp("defaults", option, optionlen) == 0) {
+			if (strncmp("defaults", option, optionlen) == 0) {
 				flags &= ~(MS_RDONLY | MS_NOSUID | MS_NODEV | MS_NOEXEC | MS_SYNCHRONOUS);
 				continue;
 			}
 
 			const struct mount_option *current = mountoptions,
-				* const end = mountoptions + sizeof(mountoptions) / sizeof(*mountoptions);
-			while(current != end) {
+				* const end = mountoptions + sizeof (mountoptions) / sizeof (*mountoptions);
+			while (current != end) {
 
-				if(strncmp(current->on, option, optionlen) == 0) {
+				if (strncmp(current->on, option, optionlen) == 0) {
 					flags |= current->mask;
 					break;
 				}
 
-				if(strncmp(current->off, option, optionlen) == 0) {
+				if (strncmp(current->off, option, optionlen) == 0) {
 					flags &= ~current->mask;
 					break;
 				}
@@ -159,15 +159,15 @@ mount_resolve_options(const char *options, char **datap) {
 				current++;
 			}
 
-			if(current == end) {
+			if (current == end) {
 				warnx("Unknown mount option '%.*s'", (int)optionlen, option);
 			}
-		} else if(strncmp("data", option, keylen) == 0) {
+		} else if (strncmp("data", option, keylen) == 0) {
 
 			free(data);
 			data = strndup(option + keylen + 1, optionlen - keylen - 1);
 
-			if(data != NULL) {
+			if (data != NULL) {
 				warnx("Mount data option too long '%.*s'", (int)optionlen, option);
 			}
 		}

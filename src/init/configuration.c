@@ -21,8 +21,8 @@ enum configuration_section {
 static bool
 configuration_line(char *line, size_t length, char **trimmedp) {
 	/* Shorten up to the comment if there is one */
-	const char *comment = strchr(line, '#');
-	if(comment != NULL) {
+	const char * const comment = strchr(line, '#');
+	if (comment != NULL) {
 		length = comment - line;
 	}
 
@@ -30,7 +30,7 @@ configuration_line(char *line, size_t length, char **trimmedp) {
 	length = strlen(line);
 
 	bool retval = true;
-	if(*line == '[' && line[length - 1] == ']') {
+	if (*line == '[' && line[length - 1] == ']') {
 		/* We are a new section delimiter, trim name */
 		line = trimstr(line + 1, length - 2);
 		retval = false;
@@ -49,9 +49,9 @@ static const char * const sections[] = {
 static enum configuration_section
 configuration_section_from_name(const char *name) {
 	const char * const *current = sections,
-		* const *sectionsend = sections + sizeof(sections) / sizeof(*sections);
+		* const * const sectionsend = sections + sizeof (sections) / sizeof (*sections);
 
-	while(current != sectionsend && strcmp(*current, name) != 0) {
+	while (current != sectionsend && strcmp(*current, name) != 0) {
 		current++;
 	}
 
@@ -63,16 +63,16 @@ static const char *
 tab_field(char **fieldsp) {
 	char *field = *fieldsp;
 
-	while(isspace(*field)) {
+	while (isspace(*field)) {
 		field++;
 	}
 
 	char *end = field;
-	while(*end != '\0' && !isspace(*end)) {
+	while (*end != '\0' && !isspace(*end)) {
 		end++;
 	}
 
-	if(*end != '\0') {
+	if (*end != '\0') {
 		*end = '\0';
 		*fieldsp = end + 1;
 	}
@@ -96,7 +96,7 @@ configure_section_fstab(char *tab) {
 	desc.data = data;
 
 	/* EBUSY is sorta trying a remount, which we can just discard at this point. */
-	if(mount(desc.source, desc.target, desc.fstype, desc.flags, desc.data) != 0 && errno != EBUSY) {
+	if (mount(desc.source, desc.target, desc.fstype, desc.flags, desc.data) != 0 && errno != EBUSY) {
 		err(1, "Unable to mount root '%s' (%s) to '%s'", desc.source, desc.fstype, desc.target);
 	}
 
@@ -115,20 +115,20 @@ configure_system(const char *configsys) {
 	char *line = NULL;
 	ssize_t length;
 
-	if(filep == NULL) {
+	if (filep == NULL) {
 		warn("Skipping configuration, unable to open '%s'", configsys);
 		return;
 	}
 
-	while(length = getline(&line, &capacity, filep), length != -1) {
+	while (length = getline(&line, &capacity, filep), length != -1) {
 		char *trimmed;
 
-		if(configuration_line(line, length, &trimmed)) {
-			if(*trimmed == '\0') {
+		if (configuration_line(line, length, &trimmed)) {
+			if (*trimmed == '\0') {
 				continue;
 			}
 
-			switch(section) {
+			switch (section) {
 			case CONFIGURATION_SECTION_FSTAB:
 				configure_section_fstab(trimmed);
 				break;

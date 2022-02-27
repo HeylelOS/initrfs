@@ -3,7 +3,7 @@
 
 int
 isspace(int c) {
-	switch(c) {
+	switch (c) {
 	case ' ':
 	case '\f':
 	case '\n':

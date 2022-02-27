@@ -15,7 +15,7 @@ init_system(const char *init) {
 		"init", NULL
 	};
 
-	if(init == NULL) {
+	if (init == NULL) {
 		init = "/sbin/init";
 	}
 

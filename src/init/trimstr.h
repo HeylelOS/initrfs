@@ -9,13 +9,13 @@ static inline char *
 trimstr(char *trimmed, size_t length) {
 
 	/* Trim the beginning */
-	while(isspace(*trimmed)) {
+	while (isspace(*trimmed)) {
 		length--;
 		trimmed++;
 	}
 
 	/* Trim the end */
-	while(isspace(trimmed[length - 1])) {
+	while (isspace(trimmed[length - 1])) {
 		length--;
 	}
 	/* If there wasn't anything to end-trim, no problem,
