@@ -4,8 +4,8 @@
 
 #include <stdnoreturn.h>
 
-#include <_NULL.h>
-#include <_size_t.h>
+#include <_/NULL.h>
+#include <_/size_t.h>
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1

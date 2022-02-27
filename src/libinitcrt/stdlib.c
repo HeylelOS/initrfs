@@ -6,7 +6,7 @@
 #include <unistd.h> /* _exit */
 #include <sys/mman.h> /* mmap */
 
-#include <_uint8_t.h>
+#include <_/uint8_t.h>
 
 #define _clz(value) _Generic(value, \
 	unsigned int: __builtin_clz, \

@@ -4,8 +4,8 @@
 
 #include <stdnoreturn.h>
 
-#include <_size_t.h>
-#include <_ssize_t.h>
+#include <_/size_t.h>
+#include <_/ssize_t.h>
 
 void noreturn _exit(int);
 

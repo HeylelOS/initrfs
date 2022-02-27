@@ -4,8 +4,8 @@
 
 #include <stdarg.h>
 
-#include <_size_t.h>
-#include <_ssize_t.h>
+#include <_/size_t.h>
+#include <_/ssize_t.h>
 
 #define stdin _stdin()
 #define stdout _stdout()

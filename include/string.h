@@ -2,8 +2,8 @@
 #ifndef _STRING_H
 #define _STRING_H
 
-#include <_NULL.h>
-#include <_size_t.h>
+#include <_/NULL.h>
+#include <_/size_t.h>
 
 void *memchr(const void *, int, size_t);
 void *memcpy(void *, const void *, size_t);

@@ -4,8 +4,8 @@
 #include <stdlib.h> /* malloc, free */
 #include <unistd.h> /* close */
 
-#include <_NULL.h>
-#include <_ssize_t.h>
+#include <_/NULL.h>
+#include <_/ssize_t.h>
 
 _Static_assert(sizeof(long) == 8, "long is not a 64-bits type");
 

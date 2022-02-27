@@ -6,7 +6,7 @@
 #include <unistd.h> /* read, write, close */
 #include <fcntl.h> /* open */
 
-#include <_NULL.h>
+#include <_/NULL.h>
 
 struct _FILE {
 	char *_ibuffer;

@@ -3,7 +3,7 @@
 
 #include <stdlib.h> /* malloc */
 #include <stdbool.h> /* bool, false */
-#include <_uint8_t.h>
+#include <_/uint8_t.h>
 
 void *
 memchr(const void *pointer, int value, size_t count) {
